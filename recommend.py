@@ -1,0 +1,86 @@
+import chromadb
+import os
+from huggingface_hub import InferenceClient
+import chromadb
+import json
+from typing import Dict, Any, Tuple, List
+
+
+hf_client = InferenceClient(
+    provider="hf-inference",
+    api_key=os.environ["HF_API_TOKEN"],
+)
+
+# persistent chroma DB
+chroma_client = chromadb.PersistentClient(path="chroma_db")
+collection = chroma_client.get_or_create_collection("investors")
+
+
+def embed_text(text: str):
+    embedding = hf_client.feature_extraction(text, model="BAAI/bge-small-en-v1.5")
+    return embedding
+
+
+def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, float]]:
+    """Query Chroma and filter results.
+
+    Builds a robust query string and filters results by ticket size and stage.
+    """
+    # build query text defensively
+    parts = [
+        startup.get("problem_statement", ""),
+        startup.get("solution_description", ""),
+    ]
+    industry_tags = startup.get("industry_tags", [])
+    if isinstance(industry_tags, list):
+        parts.append(" ".join(industry_tags))
+    else:
+        parts.append(str(industry_tags))
+
+    parts.append(f"Stage: {startup.get('stage', '')}")
+    parts.append(f"Funding ask: {startup.get('funding_ask_usd', '')}")
+    query_text = " ".join([p for p in parts if p])
+    query_vector = embed_text(query_text)
+    results = collection.query(query_embeddings=[query_vector], n_results=k)
+
+    filtered: List[Tuple[Any, float]] = []
+    ids = results.get("ids", [[]])[0]
+    metadatas = results.get("metadatas", [[]])[0]
+    distances = results.get("distances", [[]])[0]
+
+    for id_, meta, dist in zip(ids, metadatas, distances):
+        try:
+            ticket_min = int(meta.get("ticket_min_usd", 0))
+            ticket_max = int(meta.get("ticket_max_usd", 0))
+        except Exception:
+            continue
+
+        raw_stage = meta.get("stage_focus")
+        if isinstance(raw_stage, list):
+            stages = raw_stage
+        elif isinstance(raw_stage, str):
+            raw = raw_stage.strip()
+            if raw.startswith("[") and raw.endswith("]"):
+                try:
+                    stages = json.loads(raw)
+                except Exception:
+                    stages = [raw]
+            else:
+                stages = [raw]
+        else:
+            stages = [str(raw_stage)]
+
+        funding_ask = startup.get("funding_ask_usd")
+        stage = startup.get("stage")
+
+        if funding_ask is None or stage is None:
+            filtered.append((meta, 1 - dist))
+            continue
+
+        if (
+            ticket_min <= funding_ask <= ticket_max
+            and stage in stages
+        ):
+            filtered.append((meta, 1 - dist))
+
+    return filtered

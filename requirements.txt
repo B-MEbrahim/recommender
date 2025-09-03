@@ -1,0 +1,4 @@
+flask
+gunicorn
+chromadb
+huggingface_hub
