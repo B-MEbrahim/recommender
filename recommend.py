@@ -81,6 +81,6 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
             ticket_min <= funding_ask <= ticket_max
             and stage in stages
         ):
-            filtered.append((meta, 1 - dist))
+            filtered.append((id_, 1 - dist))
 
     return filtered
