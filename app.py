@@ -51,7 +51,7 @@ def recommend_route():
         return jsonify({"error": "Recommendation failed", "detail": str(e)}), 500
 
     return jsonify({
-        "input": startup,
+        "startup_id": data.get("startup_id"),
         "k": k_val,
         "recommendations": recommendations,
     })
