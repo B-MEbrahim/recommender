@@ -83,7 +83,12 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
         stage = startup.get("stage")
 
         if funding_ask is None or stage is None:
-            filtered.append((meta, 1 - dist))
+            reasons.append("Stage or funding not provided, matched by similarity only.")
+            filtered.append({
+            "investor_id": id_,
+            "score": 1 - dist,
+            "reasons": reasons,
+            })
             continue
 
         if (
@@ -92,6 +97,10 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
         ):
             reasons.append("Funding matches investor range.")
             reasons.append("Stage matches investor focus.")
-            filtered.append({"investor_id": id_, "score": 1 - dist, "reasons": reasons})
+            filtered.append({
+                "investor_id": id_,
+                "score": 1 - dist,
+                "reasons": reasons,
+            })
 
     return filtered
