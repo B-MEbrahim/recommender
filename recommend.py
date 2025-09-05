@@ -44,6 +44,7 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
     results = collection.query(query_embeddings=[query_vector], n_results=k)
 
     filtered: List[Tuple[Any, float]] = []
+    reasons: List[str] = []
     ids = results.get("ids", [[]])[0]
     metadatas = results.get("metadatas", [[]])[0]
     distances = results.get("distances", [[]])[0]
@@ -70,6 +71,14 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
         else:
             stages = [str(raw_stage)]
 
+        if industry_tags:
+            inv_tags = meta.get("industry_tags", [])
+            if isinstance(inv_tags, str):
+                inv_tags = [inv_tags]
+            matched_tags = list(set(industry_tags) & set(inv_tags))
+            if matched_tags:
+                reasons.append(f"Industry tags match: {', '.join(matched_tags)}")
+
         funding_ask = startup.get("funding_ask_egb")
         stage = startup.get("stage")
 
@@ -81,6 +90,8 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
             ticket_min <= funding_ask <= ticket_max
             and stage in stages
         ):
-            filtered.append({"investor_id": id_, "score": 1 - dist})
+            reasons.append("Funding matches investor range.")
+            reasons.append("Stage matches investor focus.")
+            filtered.append({"investor_id": id_, "score": 1 - dist, "reasons": reasons})
 
     return filtered
