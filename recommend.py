@@ -44,12 +44,12 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
     results = collection.query(query_embeddings=[query_vector], n_results=k)
 
     filtered: List[Tuple[Any, float]] = []
-    reasons: List[str] = []
     ids = results.get("ids", [[]])[0]
     metadatas = results.get("metadatas", [[]])[0]
     distances = results.get("distances", [[]])[0]
 
     for id_, meta, dist in zip(ids, metadatas, distances):
+        reasons: List[str] = []
         try:
             ticket_min = int(meta.get("ticket_min_egp", 0))
             ticket_max = int(meta.get("ticket_max_egp", 0))
