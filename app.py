@@ -28,7 +28,7 @@ def recommend_route():
         "solution_description": data.get("solution_description", ""),
         "industry_tags": data.get("industry_tags", []),
         "stage": data.get("stage"),
-        "funding_ask_egb": data.get("funding_ask_egb"),
+        "funding_ask_egp": data.get("funding_ask_egp"),
     }
 
     # Optional k
