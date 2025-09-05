@@ -16,7 +16,7 @@ def recommend_route():
       "solution_description": str,
       "industry_tags": [str, ...],
       "stage": str,  # e.g., "Seed", "Series A"
-      "funding_ask_usd": int,
+      "funding_ask_egb": int,
       "k": int  # optional, number of results
     }
     """
@@ -28,7 +28,7 @@ def recommend_route():
         "solution_description": data.get("solution_description", ""),
         "industry_tags": data.get("industry_tags", []),
         "stage": data.get("stage"),
-        "funding_ask_usd": data.get("funding_ask_usd"),
+        "funding_ask_egb": data.get("funding_ask_egb"),
     }
 
     # Optional k

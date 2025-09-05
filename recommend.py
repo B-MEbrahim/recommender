@@ -38,7 +38,7 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
         parts.append(str(industry_tags))
 
     parts.append(f"Stage: {startup.get('stage', '')}")
-    parts.append(f"Funding ask: {startup.get('funding_ask_usd', '')}")
+    parts.append(f"Funding ask: {startup.get('funding_ask_egb', '')}")
     query_text = " ".join([p for p in parts if p])
     query_vector = embed_text(query_text)
     results = collection.query(query_embeddings=[query_vector], n_results=k)
@@ -50,8 +50,8 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
 
     for id_, meta, dist in zip(ids, metadatas, distances):
         try:
-            ticket_min = int(meta.get("ticket_min_usd", 0))
-            ticket_max = int(meta.get("ticket_max_usd", 0))
+            ticket_min = int(meta.get("ticket_min_egp", 0))
+            ticket_max = int(meta.get("ticket_max_egp", 0))
         except Exception:
             continue
 
@@ -70,7 +70,7 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
         else:
             stages = [str(raw_stage)]
 
-        funding_ask = startup.get("funding_ask_usd")
+        funding_ask = startup.get("funding_ask_egb")
         stage = startup.get("stage")
 
         if funding_ask is None or stage is None:
