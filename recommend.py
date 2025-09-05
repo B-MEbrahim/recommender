@@ -79,7 +79,7 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
             if matched_tags:
                 reasons.append(f"Industry tags match: {', '.join(matched_tags)}")
 
-        funding_ask = startup.get("funding_ask_egb")
+        funding_ask = startup.get("funding_ask_egp")
         stage = startup.get("stage")
 
         if funding_ask is None or stage is None:
