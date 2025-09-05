@@ -82,9 +82,9 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
         funding_ask = startup.get("funding_ask_egb")
         stage = startup.get("stage")
 
-        if funding_ask is None or stage is None:
-            filtered.append((meta, 1 - dist))
-            continue
+        # if funding_ask is None or stage is None:
+        #     filtered.append((meta, 1 - dist))
+        #     continue
 
         if (
             ticket_min <= funding_ask <= ticket_max
