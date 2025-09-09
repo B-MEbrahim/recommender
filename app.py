@@ -20,7 +20,9 @@ def recommend_route():
       "k": int  # number of results
     }
     """
-    data = request.get_json(silent=True) or {}
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid or missing JSON body"}), 400
 
     # Basic validation and defaults
     startup = {
@@ -48,7 +50,7 @@ def recommend_route():
     try:
         recommendations = recommend_investors(startup, k=k_val)
     except Exception as e:
-        return jsonify({"error": "Recommendation failed", "detail": str(e)}), 500
+        return jsonify({"error": "Recommendation failed"}), 500
 
     return jsonify({
         "startup_id": data.get("startup_id"),
