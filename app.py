@@ -16,8 +16,8 @@ def recommend_route():
       "solution_description": str,
       "industry_tags": [str, ...],
       "stage": str,  # e.g., "Seed", "Series A"
-      "funding_ask_egb": int,
-      "k": int  # optional, number of results
+      "funding_ask_egp": int,
+      "k": int  # number of results
     }
     """
     data = request.get_json(silent=True) or {}
