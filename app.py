@@ -105,7 +105,7 @@ def add_investors_route():
 
 @app.route("/", methods=["GET"]) 
 def home():
-    return jsonify({"message": "Welcome to the Startup Investor Recommendation API!", "endpoints": ["GET /", "POST /recommend"]})
+    return jsonify({"message": "Welcome to the Startup Investor Recommendation API!", "endpoints": ["GET /", "POST /recommend", "POST /add_investors"]})
 
 
 if __name__ == "__main__":
