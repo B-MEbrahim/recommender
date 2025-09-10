@@ -12,6 +12,7 @@ def recommend_route():
 
     Expected JSON body:
     {
+      "startup_id": str,
       "problem_statement": str,
       "solution_description": str,
       "industry_tags": [str, ...],
