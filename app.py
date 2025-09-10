@@ -52,7 +52,7 @@ def recommend_route():
     try:
         recommendations = recommend_investors(startup, k=k_val)
     except Exception as e:
-        return jsonify({"error": "Recommendation failed"}), 500
+        return jsonify({"error": f"Recommendation failed: {str(e)}"}), 500
 
     return jsonify({
         "startup_id": data.get("startup_id"),
