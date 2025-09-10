@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import os
 from recommend import recommend_investors
+from add_investors import add_investor_to_chroma
 
 
 app = Flask(__name__)
@@ -58,6 +59,48 @@ def recommend_route():
         "k": k_val,
         "recommendations": recommendations,
     })
+
+
+@app.route("/add_investors", methods=["POST"])
+def add_investors_route():
+    """Add one or more new investors to the database.
+
+    Expected JSON body:
+    {
+      "investors": [
+        {
+          "investor_id": str,
+          "name": str,
+          "stage_focus": [str, ...],
+          "ticket_min_egp": int,
+          "ticket_max_egp": int,
+          "industry_tags": [str, ...],
+          "thesis_text": str,
+          "email": str
+        },
+        ...
+      ]
+    }
+    """
+
+    data = request.get_json()
+    if not data or "investors" not in data or not isinstance(data["investors"], list):
+        return jsonify({"error": "Invalid or missing JSON body. Expected 'investors' as a list."}), 400
+
+    required_fields = ["investor_id", "stage_focus", "ticket_min_egp", "ticket_max_egp", "email", "thesis_text"]
+    results = []
+    for investor in data["investors"]:
+        missing = [field for field in required_fields if field not in investor]
+        if missing:
+            results.append({"investor_id": investor.get("investor_id"), "error": f"Missing required fields: {', '.join(missing)}"})
+            continue
+        try:
+            add_investor_to_chroma(investor)
+            results.append({"investor_id": investor.get("investor_id"), "status": "success"})
+        except Exception:
+            results.append({"investor_id": investor.get("investor_id"), "error": "Failed to add investor"})
+
+    return jsonify({"results": results}), 200
 
 
 @app.route("/", methods=["GET"]) 
