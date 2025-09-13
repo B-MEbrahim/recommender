@@ -44,16 +44,25 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
     results = collection.query(query_embeddings=[query_vector], n_results=k)
 
     filtered: List[Tuple[Any, float]] = []
-    ids = results.get("ids", [[]])[0]
-    metadatas = results.get("metadatas", [[]])[0]
-    distances = results.get("distances", [[]])[0]
+    try:
+        ids = results.get("ids", [[]])[0]
+        metadatas = results.get("metadatas", [[]])[0]
+        distances = results.get("distances", [[]])[0]
+    except Exception as e:
+        print(f"Error extracting results from Chroma: {e}")
+        return []
+
+    if not ids or not metadatas or not distances:
+        print("No results returned from Chroma query.")
+        return []
 
     for id_, meta, dist in zip(ids, metadatas, distances):
         reasons: List[str] = []
         try:
             ticket_min = int(meta.get("ticket_min_egp", 0))
             ticket_max = int(meta.get("ticket_max_egp", 0))
-        except Exception:
+        except Exception as e:
+            print(f"Error parsing ticket size for investor {id_}: {e}")
             continue
 
         raw_stage = meta.get("stage_focus")
@@ -64,7 +73,8 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
             if raw.startswith("[") and raw.endswith("]"):
                 try:
                     stages = json.loads(raw)
-                except Exception:
+                except Exception as e:
+                    print(f"Error parsing stage_focus for investor {id_}: {e}")
                     stages = [raw]
             else:
                 stages = [raw]
@@ -85,22 +95,28 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
         if funding_ask is None or stage is None:
             reasons.append("Stage or funding not provided, matched by similarity only.")
             filtered.append({
-            "investor_id": id_,
-            "score": 1 - dist,
-            "reasons": reasons,
-            })
-            continue
-
-        if (
-            ticket_min <= funding_ask <= ticket_max
-            and stage in stages
-        ):
-            reasons.append("Funding matches investor range.")
-            reasons.append("Stage matches investor focus.")
-            filtered.append({
                 "investor_id": id_,
                 "score": 1 - dist,
                 "reasons": reasons,
             })
+            continue
 
+        try:
+            if (
+                ticket_min <= funding_ask <= ticket_max
+                and stage in stages
+            ):
+                reasons.append("Funding matches investor range.")
+                reasons.append("Stage matches investor focus.")
+                filtered.append({
+                    "investor_id": id_,
+                    "score": 1 - dist,
+                    "reasons": reasons,
+                })
+        except Exception as e:
+            print(f"Error filtering investor {id_}: {e}")
+            continue
+
+    if not filtered:
+        print("No investors matched the criteria.")
     return filtered
