@@ -103,4 +103,4 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
                 "reasons": reasons,
             })
 
-    return filtered
+    return results
