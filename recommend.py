@@ -104,7 +104,7 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
         try:
             if (
                 ticket_min <= funding_ask <= ticket_max
-                and stage in stages
+                and stage.lower() in [s.lower() for s in stages]
             ):
                 reasons.append("Funding matches investor range.")
                 reasons.append("Stage matches investor focus.")
