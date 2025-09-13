@@ -38,7 +38,7 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
         parts.append(str(industry_tags))
 
     parts.append(f"Stage: {startup.get('stage', '')}")
-    parts.append(f"Funding ask: {startup.get('funding_ask_egb', '')}")
+    parts.append(f"Funding ask: {startup.get('funding_ask_egp', '')}")
     query_text = " ".join([p for p in parts if p])
     query_vector = embed_text(query_text)
     results = collection.query(query_embeddings=[query_vector], n_results=k)
