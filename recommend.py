@@ -49,12 +49,10 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
         metadatas = results.get("metadatas", [[]])[0]
         distances = results.get("distances", [[]])[0]
     except Exception as e:
-        print(f"Error extracting results from Chroma: {e}")
-        return []
+        return [{"error": f"Error extracting results from Chroma: {str(e)}"}]
 
     if not ids or not metadatas or not distances:
-        print("No results returned from Chroma query.")
-        return []
+        return [{"error": "No results returned from Chroma query"}]
 
     for id_, meta, dist in zip(ids, metadatas, distances):
         reasons: List[str] = []
@@ -62,8 +60,7 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
             ticket_min = int(meta.get("ticket_min_egp", 0))
             ticket_max = int(meta.get("ticket_max_egp", 0))
         except Exception as e:
-            print(f"Error parsing ticket size for investor {id_}: {e}")
-            continue
+            return [{"error": f"Error parsing ticket size for investor {id_}: {str(e)}"}]
 
         raw_stage = meta.get("stage_focus")
         if isinstance(raw_stage, list):
@@ -74,8 +71,7 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
                 try:
                     stages = json.loads(raw)
                 except Exception as e:
-                    print(f"Error parsing stage_focus for investor {id_}: {e}")
-                    stages = [raw]
+                    return [{"error": f"Error parsing stage_focus for investor {id_}: {str(e)}"}]
             else:
                 stages = [raw]
         else:
@@ -114,9 +110,8 @@ def recommend_investors(startup: Dict[str, Any], k: int = 3) -> List[Tuple[Any, 
                     "reasons": reasons,
                 })
         except Exception as e:
-            print(f"Error filtering investor {id_}: {e}")
-            continue
+            return [{"error": f"Error filtering investor {id_}: {str(e)}"}]
 
     if not filtered:
-        print("No investors matched the criteria.")
+        return [{"error": "No investors matched the criteria"}]
     return filtered
